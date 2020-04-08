@@ -3,17 +3,28 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: corretto8
+      docker: 18
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI=536356691616.dkr.ecr.us-east-1.amazonaws.com/thiago-corp
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - PROJECT=$(echo $CODEBUILD_BUILD_ID |cut -d ':' -f1)
+      - IMAGE_TAG=${PROJECT}_${COMMIT_HASH:=latest}
   build:
     commands:
       - echo Build started on `date`
-      - mvn test 
+      - export MAVEN_CONFIG=''
+      - ./mvnw package
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
-      - mvn package
-artifacts:
-  files:
-    - target/movie-lottery-0.0.1-SNAPSHOT.jar
-    - appspec.yml
-  discard-paths: yes
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definiti e /movie-lottery/image/repository_uri --type String --value $REPOSITORY_URI --overwrite
+      - aws ssm put-parameter --name /movie-lottery/image/tag --type String --value $IMAGE_TAG --overwrite
