@@ -1,0 +1,28 @@
+version: "3.3"
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: movie-lottery
+
+    ports:
+      - "3306:3306"
+    networks:
+      - movie-lottery
+
+  movie-lottery:
+    image: movie-lottery
+    ports:
+      - "8000:8080"
+    networks:
+      - movie-lottery
+
+volumes:
+  db_data: {}
+networks:
+  movie-lottery:
