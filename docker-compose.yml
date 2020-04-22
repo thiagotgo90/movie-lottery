@@ -19,6 +19,12 @@ services:
     image: movie-lottery
     ports:
       - "8000:8080"
+    environment: 
+      DATABASE_HOST: db
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+
     networks:
       - movie-lottery
 
