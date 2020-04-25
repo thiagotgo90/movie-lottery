@@ -29,5 +29,5 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:$IMAGE_BUILD_TAG
       - docker push $REPOSITORY_URI:$IMAGE_DEPLOY_TAG
-      - echo Writing image definiti e /movie-lottery/image/repository_uri --type String --value $REPOSITORY_URI --overwrite
-      - aws ssm put-parameter --name /movie-lottery/image/tag --type String --value $IMAGE_TAG --overwrite
+      - echo Writing image definition
+      - aws ssm put-parameter --name /movie-lottery/image/tag --type String --value $IMAGE_BUILD_TAG --overwrite
