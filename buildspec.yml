@@ -12,7 +12,8 @@ phases:
       - REPOSITORY_URI=536356691616.dkr.ecr.us-east-1.amazonaws.com/thiago-corp
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - PROJECT=$(echo $CODEBUILD_BUILD_ID |cut -d ':' -f1)
-      - IMAGE_TAG=${PROJECT}_${COMMIT_HASH:=latest}
+      - IMAGE_BUILD_TAG=${PROJECT}_${COMMIT_HASH:=latest}
+      - IMAGE_DEPLOY_TAG=${PROJECT}_DEV
   build:
     commands:
       - echo Build started on `date`
@@ -20,11 +21,13 @@ phases:
       - ./mvnw package
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_BUILD_TAG
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_DEPLOY_TAG
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:$IMAGE_BUILD_TAG
+      - docker push $REPOSITORY_URI:$IMAGE_DEPLOY_TAG
       - echo Writing image definiti e /movie-lottery/image/repository_uri --type String --value $REPOSITORY_URI --overwrite
       - aws ssm put-parameter --name /movie-lottery/image/tag --type String --value $IMAGE_TAG --overwrite
