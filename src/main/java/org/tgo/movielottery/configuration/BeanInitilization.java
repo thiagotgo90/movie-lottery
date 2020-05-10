@@ -1,4 +1,4 @@
-package org.tgo.movielottery.movie.configuration;
+package org.tgo.movielottery.configuration;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
