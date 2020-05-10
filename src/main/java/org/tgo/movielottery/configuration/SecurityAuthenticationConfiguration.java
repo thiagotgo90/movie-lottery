@@ -1,15 +1,21 @@
 package org.tgo.movielottery.configuration;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SimpleSavedRequest;
 
 @Configuration
 public class SecurityAuthenticationConfiguration extends WebSecurityConfigurerAdapter {
@@ -37,23 +43,29 @@ public class SecurityAuthenticationConfiguration extends WebSecurityConfigurerAd
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+
 		http
-			.csrf().disable().authorizeRequests()
-        	.antMatchers(HttpMethod.GET,"/index*", "/static/**", "/*.js", "/*.json", "/*.ico").permitAll()
-			.antMatchers("/h2/console/**").permitAll()
-			.antMatchers("/built/**", "/main.css").permitAll()
-			.anyRequest().authenticated().and()
-		.formLogin()
-			// .loginPage("/index.html")
-			// .loginProcessingUrl("/perform_login")
-			.defaultSuccessUrl("/",true).and()
-			// .failureUrl("/index.html?error=true").and()
-		.httpBasic().and()
-		.csrf()
-			.ignoringAntMatchers("/h2/console/**").and()
-		.headers()
-			.frameOptions().sameOrigin();
+            .formLogin().and()
+            .csrf()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
+            .authorizeRequests()
+                .antMatchers("/**/*.{js,html,css}").permitAll()
+                .antMatchers("/", "/api/user").permitAll()
+                .anyRequest().authenticated();
 	}
-	
+
+	@Bean
+    public RequestCache refererRequestCache() {
+        return new HttpSessionRequestCache() {
+            @Override
+            public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
+                String referrer = request.getHeader("referer");
+                if (referrer != null) {
+                    request.getSession().setAttribute("SPRING_SECURITY_SAVED_REQUEST", new SimpleSavedRequest(referrer));
+                }
+            }
+        };
+	}
 	
 }
