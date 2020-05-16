@@ -31,7 +31,13 @@ public class ImdbService {
 		String url = String.format("http://www.omdbapi.com/?t=%s&apikey=%s&type=movie", title, apiProperties.getOmdb().getKey());
 
 		ResponseEntity<ImdbMovie> entity = restTemplate.getForEntity(new URI(url), ImdbMovie.class);
-		return entity.getBody();
+		
+		if(entity.getStatusCode().is2xxSuccessful()) {
+			return entity.getBody();
+		}
+		
+		return null;
+		
 	}
 
 }

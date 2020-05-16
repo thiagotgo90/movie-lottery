@@ -2,6 +2,7 @@ package org.tgo.movielottery.movie;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.Random;
 
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +48,12 @@ public class MovieController {
 		
 		ResultList<MovieBasic> watchListMovie = tmdbAccount.getWatchListMovie(userAuthentication.getSessionid(), userAuthentication.getAccountId(), 1, null, null);
 		
+		int random = new Random().nextInt(watchListMovie.getResults().size());
+		ImdbMovie movie = imdbService.getMovie(watchListMovie.getResults().get(random).getTitle());
 		
-		ImdbMovie movie = imdbService.getMovie(watchListMovie.getResults().get(0).getTitle());
+		if(movie == null) {
+			return ResponseEntity.notFound().build();
+		}
 		
 		return ResponseEntity.ok(movie);
 	}

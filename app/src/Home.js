@@ -51,22 +51,20 @@ class Home extends Component {
     }
 
     render() {
-        const message = this.state.user ?
-            <h2>Welcome, {this.state.user.name}!</h2> :
-            <p>Please log in to manage your JUG Tour.</p>;
 
-        const button = this.state.isAuthenticated ?
-            <div>
-                <Button color="link"><Link to="/groups">Manage JUG Tour</Link></Button>
-                <br />
-                <Button color="link" onClick={this.logout}>Logout</Button>
-            </div> :
-            <Button color="primary" onClick={this.login}>Login</Button>;
+        const isAuthenticated = this.state.isAuthenticated;
+        let message = ""
+        let button = ""
+
+        if(isAuthenticated) {
+            button = <Button outline color="primary"><Link to="/movie/random">Random Movie</Link></Button>
+        } else {
+            button = <Button outline color="primary" onClick={this.login}>Login</Button>;
+        }
 
         return (
             <div>
                 <Container fluid>
-                    {message}
                     {button}
                 </Container>
             </div>

@@ -4,10 +4,10 @@ import React, { Component } from 'react';
 
 import {
     Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, Container, Table
+    CardTitle, Button, Container, Table
 } from 'reactstrap';
 
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 
 class Movie extends Component {
 
@@ -32,13 +32,24 @@ class Movie extends Component {
     }
 
     async componentDidMount() {
-        const movie = await (await fetch('/movie/random', { credentials: 'include' })).json();
-        this.setState({ item: movie });
+        const movie = await fetch('/movie/random', { credentials: 'include' });
+        
+        if(movie.ok){
+            this.setState({ item: await movie.json() });
+        } else {
+            this.setState({item: null})
+        }
+        
     }
 
     render() {
         const { item } = this.state;
         const title = <h2>Your Movie for Today</h2>;
+
+        if(item == null) {
+            return <Button outline color="primary"><Link to="/movie/random">Random Movie</Link></Button>
+
+        }
 
         return <Container>
             <Card>
